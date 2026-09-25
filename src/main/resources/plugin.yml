@@ -1,0 +1,7 @@
+name: SpawnAuth
+version: '${project.version}'
+main: me.lokspel.spawnauth.SpawnAuth
+api-version: '1.13'
+folia-supported: true
+authors: [ lokspel ]
+softdepend: [ AuthMe, nLogin, OpeNLogin, LoginSecurity ]

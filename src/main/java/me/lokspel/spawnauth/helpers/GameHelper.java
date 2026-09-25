@@ -1,0 +1,164 @@
+package me.lokspel.spawnauth.helpers;
+
+import me.lokspel.spawnauth.SpawnAuth;
+import me.lokspel.spawnauth.config.section.LimboSection;
+import me.lokspel.spawnauth.util.ReflectionUtil;
+import org.bukkit.*;
+import org.bukkit.entity.Player;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class GameHelper {
+    private static final Object RESPAWN_RADIUS_RULE = ReflectionUtil.gameRuleOrNull("RESPAWN_RADIUS", "SPAWN_RADIUS");
+
+    private final SpawnAuth plugin;
+    private final LimboSection config;
+    private Location authSpawnLocation;
+
+    public GameHelper(SpawnAuth plugin, LimboSection config) {
+        this.plugin = plugin;
+        this.config = config;
+    }
+
+    public Location getAuthSpawnLocation(String mode) {
+        if ("disabled".equalsIgnoreCase(mode)) {
+            return null;
+        }
+
+        if ("fixed".equalsIgnoreCase(mode)) {
+            if (authSpawnLocation == null) {
+                World world = Bukkit.getWorld(config.getGenerationWorldName());
+                if (world == null) return null;
+                authSpawnLocation = new Location(world, config.getFixedSpawnX() + 0.5, config.getFixedSpawnY(), config.getFixedSpawnZ() + 0.5, config.getFixedSpawnYaw(), config.getFixedSpawnPitch());
+            }
+            return authSpawnLocation.clone();
+        }
+
+        World world = Bukkit.getWorld(config.getOverworldName());
+        if (world == null) return null;
+        return getServerSpawnLocation(world);
+    }
+
+    private Location getServerSpawnLocation(World world) {
+        Location spawn = world.getSpawnLocation();
+
+        int radius = ReflectionUtil.getIntGameRule(world, RESPAWN_RADIUS_RULE, "spawnRadius", 0);
+
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int x = spawn.getBlockX() + random.nextInt(-radius, radius + 1);
+        int z = spawn.getBlockZ() + random.nextInt(-radius, radius + 1);
+
+        int y = world.getHighestBlockYAt(x, z) + 1;
+
+        return new Location(world, x + 0.5, y, z + 0.5);
+    }
+
+    public boolean isInAuthWorld(Location location) {
+        if (location == null || location.getWorld() == null) return false;
+        return location.getWorld().getName().equals(config.getOverworldName())
+                || location.getWorld().getName().equals(config.getGenerationWorldName());
+    }
+
+    public boolean isNotAtAuthSpawn(Location location, String mode) {
+        if (location == null || location.getWorld() == null) return true;
+        Location authSpawn = getAuthSpawnLocation(mode);
+        if (authSpawn == null || authSpawn.getWorld() == null) return true;
+        if (!location.getWorld().equals(authSpawn.getWorld())) return true;
+        return location.distanceSquared(authSpawn) > 4.0;
+    }
+
+    public CompletableFuture<Boolean> teleport(Player player, Location location) {
+        if (player == null) {
+            LogHelper.LOGGER.warning("Teleport was skipped because the target player reference was null.");
+            return CompletableFuture.completedFuture(false);
+        }
+
+        if (location == null || location.getWorld() == null) {
+            LogHelper.LOGGER.warning(() -> "Teleport was skipped for player '" + player.getName()
+                    + "' because the destination location or world was null.");
+            return CompletableFuture.completedFuture(false);
+        }
+
+        if (!plugin.getFoliaLib().isFolia() && ReflectionUtil.isPrimaryThread()) {
+            return CompletableFuture.completedFuture(player.teleport(location));
+        } else {
+            return player.teleportAsync(location);
+        }
+    }
+
+    public boolean isAuthenticated(Player player) {
+        return AuthHelper.isAuthenticated(player);
+    }
+
+    public boolean shouldTeleport(String mode) {
+        return !"disabled".equalsIgnoreCase(mode);
+    }
+
+    public void teleportAuthenticated(Player player, SaveHelper saveHelper, String mode) {
+        if (!shouldTeleport(mode)) {
+            return;
+        }
+
+        String name = player.getName();
+        saveHelper.takeLocation(name).thenAccept(location -> {
+            if (location != null) {
+                plugin.getFoliaLib().getScheduler().runAtEntity(player, unused -> teleport(player, location));
+            }
+        });
+    }
+
+    public void updateLimboCollision(Player player) {
+        if (player == null) {
+            return;
+        }
+
+        updateLimboCollision(player, player.getLocation());
+    }
+
+    public void updateLimboCollision(Player player, Location location) {
+        if (player == null) {
+            return;
+        }
+
+        boolean inLimbo = isInAuthWorld(location) && !isAuthenticated(player);
+        ReflectionUtil.setCollidable(player, !inLimbo);
+    }
+
+    public void updateLimboWeather(Player player) {
+        updateLimboWeather(player, player != null ? player.getLocation() : null);
+    }
+
+    public void updateLimboWeather(Player player, Location location) {
+        if (player == null) {
+            return;
+        }
+
+        if (isInAuthWorld(location) && !isAuthenticated(player)) {
+            player.setPlayerWeather(WeatherType.CLEAR);
+            return;
+        }
+
+        player.resetPlayerWeather();
+    }
+
+    public void resetCollision(Player player) {
+        if (player == null) {
+            return;
+        }
+
+        ReflectionUtil.setCollidable(player, true);
+    }
+
+    public void resetWeather(Player player) {
+        if (player == null) {
+            return;
+        }
+
+        player.resetPlayerWeather();
+    }
+
+    public void setAuthSpawnLocation(Location authSpawnLocation) {
+        this.authSpawnLocation = authSpawnLocation != null ? authSpawnLocation.clone() : null;
+    }
+}

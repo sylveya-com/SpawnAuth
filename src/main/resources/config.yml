@@ -1,0 +1,67 @@
+# The world the player returns to after authentication.
+# All dimensions (overworld, nether, end) use this single world.
+worlds:
+  overworld: world
+
+# Where to move unauthenticated players (waiting spot before auth):
+#   vanilla  - leave the player at the server spawn of the overworld
+#   fixed    - move the player to the fixed spawn coordinates below
+#   disabled - do not move the player at all
+#
+# After authentication the player is always returned to the
+# location they had before being moved to the auth spawn.
+register:
+  spawn-mode: vanilla
+login:
+  spawn-mode: vanilla
+
+# Where to send the player in "fixed" mode.
+fixed:
+  # The world to use. Can be an existing world or one created by this plugin.
+  world: limbo
+
+  # If true, the void world is created automatically when it doesn't exist
+  # (overworld type, with a small platform under the spawn point).
+  # If false and the world doesn't exist, the fixed mode is skipped.
+  create: false
+
+  # Exact spawn coordinates. Always used in "fixed" mode,
+  # regardless of whether the world is created or already exists.
+  spawn:
+    x: 7
+    y: 70
+    z: 7
+    yaw: 0
+    pitch: 0
+
+  # Radius of the stone/grass platform around the spawn in the
+  # auto-created void world. Ignored when using an existing world.
+  platform-radius: 1
+
+# Where saved player locations are stored before authentication:
+#   sqlite - server-side SQLite database (default)
+#   mysql  - external MySQL database (set the credentials below)
+#   none   - do not store anywhere (requires cache: true)
+database:
+  type: sqlite
+
+  # Prefix used for table names in the database.
+  table-prefix: spawnauth
+
+  # Cache locations in memory on top of the storage backend.
+  # With "type: none" the cache becomes the only storage.
+  cache: true
+
+  mysql:
+    host: localhost
+    port: 3306
+    database: spawnauth
+    user: root
+    password: ""
+
+    # Extra MySQL JDBC properties appended to the connection URL.
+    url-parameters: "useSSL=false&allowPublicKeyRetrieval=true"
+
+  pool:
+    max-pool-size: 10
+    connection-timeout-ms: 30000
