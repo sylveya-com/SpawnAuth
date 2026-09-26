@@ -14,7 +14,7 @@
     <!-- Runtime dependencies -->
     <paper.version>[26.2.build,)</paper.version>
     <authme.version>5.7.0-SNAPSHOT</authme.version>
-    <nlogin.version>10.4</nlogin.version>
+    <nlogin.version>2.0</nlogin.version>
     <openlogin.version>1.3</openlogin.version>
     <loginsecurity.version>3.3.1</loginsecurity.version>
     <bstats.version>3.2.1</bstats.version>
