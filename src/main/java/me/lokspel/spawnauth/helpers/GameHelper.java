@@ -14,11 +14,13 @@ public class GameHelper {
 
     private final SpawnAuth plugin;
     private final LimboSection config;
+    private final SaveHelper saveHelper;
     private Location authSpawnLocation;
 
-    public GameHelper(SpawnAuth plugin, LimboSection config) {
+    public GameHelper(SpawnAuth plugin, LimboSection config, SaveHelper saveHelper) {
         this.plugin = plugin;
         this.config = config;
+        this.saveHelper = saveHelper;
     }
 
     public Location getAuthSpawnLocation(String mode) {
@@ -60,14 +62,6 @@ public class GameHelper {
                 || location.getWorld().getName().equals(config.getGenerationWorldName());
     }
 
-    public boolean isNotAtAuthSpawn(Location location, String mode) {
-        if (location == null || location.getWorld() == null) return true;
-        Location authSpawn = getAuthSpawnLocation(mode);
-        if (authSpawn == null || authSpawn.getWorld() == null) return true;
-        if (!location.getWorld().equals(authSpawn.getWorld())) return true;
-        return location.distanceSquared(authSpawn) > 4.0;
-    }
-
     public CompletableFuture<Boolean> teleport(Player player, Location location) {
         if (player == null) {
             LogHelper.LOGGER.warning("Teleport was skipped because the target player reference was null.");
@@ -95,17 +89,25 @@ public class GameHelper {
         return !"disabled".equalsIgnoreCase(mode);
     }
 
-    public void teleportAuthenticated(Player player, SaveHelper saveHelper, String mode) {
-        if (!shouldTeleport(mode)) {
+    public void releaseFromLimbo(Player player, String mode) {
+        if (!saveHelper.usePersistence(player)) {
             return;
         }
 
-        String name = player.getName();
-        saveHelper.takeLocation(name).thenAccept(location -> {
-            if (location != null) {
-                plugin.getFoliaLib().getScheduler().runAtEntity(player, unused -> teleport(player, location));
-            }
-        });
+        if (shouldTeleport(mode)) {
+            saveHelper.takeLocation(player.getName()).thenAccept(location -> {
+                if (location != null) {
+                    plugin.getFoliaLib().getScheduler().runAtEntity(player, unused -> teleport(player, location));
+                }
+            });
+        }
+
+        updateLimboCollision(player);
+        updateLimboWeather(player);
+    }
+
+    public void releaseFromLimboAsync(Player player, String mode) {
+        plugin.getFoliaLib().getScheduler().runAtEntity(player, unused -> releaseFromLimbo(player, mode));
     }
 
     public void updateLimboCollision(Player player) {

@@ -78,7 +78,7 @@ public final class SpawnAuth extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        gameHelper = new GameHelper(this, config.limbo());
+        gameHelper = new GameHelper(this, config.limbo(), saveHelper);
 
         String loginMode = config.limbo().getLoginSpawnMode();
         String registerMode = config.limbo().getRegisterSpawnMode();
@@ -98,22 +98,22 @@ public final class SpawnAuth extends JavaPlugin {
         AuthHelper.init(provider);
 
         if ("nLogin".equals(provider)) {
-            getServer().getPluginManager().registerEvents(new NLoginLoginListener(this, gameHelper, saveHelper, loginMode, registerMode), this);
+            getServer().getPluginManager().registerEvents(new NLoginLoginListener(gameHelper, loginMode, registerMode), this);
             getServer().getPluginManager().registerEvents(new NLoginUnregisterListener(saveHelper), this);
         }
 
         if ("OpenLogin".equals(provider)) {
-            getServer().getPluginManager().registerEvents(new OpenLoginAuthenticateListener(this, gameHelper, saveHelper, loginMode, registerMode), this);
+            getServer().getPluginManager().registerEvents(new OpenLoginAuthenticateListener(gameHelper, loginMode, registerMode), this);
         }
 
         if ("AuthMe".equals(provider)) {
-            getServer().getPluginManager().registerEvents(new AuthMeLoginListener(this, gameHelper, saveHelper, loginMode, registerMode), this);
+            getServer().getPluginManager().registerEvents(new AuthMeLoginListener(gameHelper, loginMode, registerMode), this);
             getServer().getPluginManager().registerEvents(new AuthMeLogoutListener(saveHelper), this);
             getServer().getPluginManager().registerEvents(new AuthMeUnregisterListener(saveHelper), this);
         }
 
         if ("LoginSecurity".equals(provider)) {
-            getServer().getPluginManager().registerEvents(new LoginSecurityLoginListener(this, gameHelper, saveHelper, loginMode, registerMode), this);
+            getServer().getPluginManager().registerEvents(new LoginSecurityLoginListener(gameHelper, loginMode, registerMode), this);
             getServer().getPluginManager().registerEvents(new LoginSecurityLogoutListener(saveHelper), this);
             getServer().getPluginManager().registerEvents(new LoginSecurityUnregisterListener(saveHelper), this);
         }
