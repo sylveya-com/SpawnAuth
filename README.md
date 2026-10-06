@@ -59,7 +59,6 @@ The in-memory cache can also be enabled alongside a database. If the database be
 ## » Notes
 
 * The same configured world is used for all dimensions
-* There is no separate configuration for overworld, nether, or end
 * Disable the authentication plugin's built-in spawn/limbo handling when using SpawnAuth
 
 Enjoy SpawnAuth!
