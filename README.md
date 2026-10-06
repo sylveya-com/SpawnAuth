@@ -19,17 +19,6 @@ It is recommended to disable the corresponding spawn/limbo features in your auth
 
 At least one supported authentication plugin is required.
 
-## » Features
-
-* Saves and restores the player's original location
-* Separate waiting spots for **login** and **registration**
-* `vanilla`, `fixed`, and `disabled` waiting modes
-* Works across overworld, nether, and end
-* Optional automatic void world creation
-* SQLite, MySQL, or in-memory storage
-* Optional database cache
-* Automatic in-memory fallback when the database is unavailable
-
 ## » Waiting Modes
 
 ### `vanilla`
