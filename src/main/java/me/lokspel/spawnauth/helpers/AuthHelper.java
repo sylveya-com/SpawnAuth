@@ -14,8 +14,9 @@ import org.bukkit.plugin.Plugin;
 import java.util.function.Predicate;
 
 public final class AuthHelper {
-    private static Predicate<String> authCheck = name -> false;
-    private static Predicate<String> registeredCheck = name -> false;
+
+    private static Predicate<Player> authCheck = player -> false;
+    private static Predicate<Player> registeredCheck = player -> false;
 
     private AuthHelper() {
     }
@@ -23,57 +24,70 @@ public final class AuthHelper {
     public static void init(String provider) {
         switch (provider) {
             case "nLogin" -> {
-                authCheck = name -> nLoginAPI.getApi().isAuthenticated(name);
-                registeredCheck = name -> nLoginAPI.getApi().getAccount(Identity.ofKnownName(name)).isPresent();
+                authCheck = player ->
+                        nLoginAPI.getApi().isAuthenticated(player.getName());
+
+                registeredCheck = player ->
+                        nLoginAPI.getApi()
+                                .getAccount(Identity.ofKnownName(player.getName()))
+                                .isPresent();
             }
+
             case "OpenLogin" -> {
-                Plugin olPlugin = Bukkit.getPluginManager().getPlugin("OpeNLogin");
-                if (olPlugin instanceof OpenLoginBukkit openLogin) {
-                    authCheck = openLogin.getLoginManagement()::isAuthenticated;
+                Plugin plugin = Bukkit.getPluginManager().getPlugin("OpeNLogin");
+
+                if (plugin instanceof OpenLoginBukkit openLogin) {
+                    authCheck = player ->
+                            openLogin.getLoginManagement()
+                                    .isAuthenticated(player.getName());
                 }
-                registeredCheck = name -> OpenLoginBukkit.getApi().isRegistered(name);
+
+                registeredCheck = player ->
+                        OpenLoginBukkit.getApi().isRegistered(player.getName());
             }
+
             case "LoginSecurity" -> {
-                authCheck = name -> {
-                    Player player = Bukkit.getPlayer(name);
-                    if (player == null) return false;
-                    var session = LoginSecurity.getSessionManager().getPlayerSession(player);
+                authCheck = player -> {
+                    var session = LoginSecurity.getSessionManager()
+                            .getPlayerSession(player);
+
                     return session != null && session.isLoggedIn();
                 };
-                registeredCheck = name -> {
-                    Player player = Bukkit.getPlayer(name);
-                    if (player == null) return false;
-                    var session = LoginSecurity.getSessionManager().getPlayerSession(player);
+
+                registeredCheck = player -> {
+                    var session = LoginSecurity.getSessionManager()
+                            .getPlayerSession(player);
+
                     return session != null && session.isRegistered();
                 };
             }
+
             case "AuthMe" -> {
-                authCheck = name -> {
-                    Player player = Bukkit.getPlayer(name);
-                    return player != null && AuthMeApi.getInstance().isAuthenticated(player);
-                };
-                registeredCheck = name -> AuthMeApi.getInstance().isRegistered(name);
+                authCheck = player ->
+                        AuthMeApi.getInstance().isAuthenticated(player);
+
+                registeredCheck = player ->
+                        AuthMeApi.getInstance().isRegistered(player.getName());
             }
+
             case "LoginTo" -> {
-                authCheck = name -> {
-                    Player player = Bukkit.getPlayer(name);
-                    return player != null && Sessions.isPlayerLogged(player.getUniqueId());
-                };
-                registeredCheck = name -> {
-                    Player player = Bukkit.getPlayer(name);
-                    if (player == null) return false;
+                authCheck = player ->
+                        Sessions.isPlayerLogged(player.getUniqueId());
+
+                registeredCheck = player -> {
                     var database = LoginTo.getDatabase();
-                    return database != null && database.databaseContainsPlayer(player.getUniqueId());
+                    return database != null
+                            && database.databaseContainsPlayer(player.getUniqueId());
                 };
             }
         }
     }
 
     public static boolean isAuthenticated(Player player) {
-        return player != null && authCheck.test(player.getName());
+        return player != null && authCheck.test(player);
     }
 
     public static boolean isRegistered(Player player) {
-        return player != null && registeredCheck.test(player.getName());
+        return player != null && registeredCheck.test(player);
     }
 }
