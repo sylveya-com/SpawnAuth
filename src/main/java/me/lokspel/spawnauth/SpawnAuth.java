@@ -13,6 +13,9 @@ import me.lokspel.spawnauth.events.nlogin.NLoginUnregisterListener;
 import me.lokspel.spawnauth.events.loginsecurity.LoginSecurityLoginListener;
 import me.lokspel.spawnauth.events.loginsecurity.LoginSecurityLogoutListener;
 import me.lokspel.spawnauth.events.loginsecurity.LoginSecurityUnregisterListener;
+import me.lokspel.spawnauth.events.loginto.LoginToJoinListener;
+import me.lokspel.spawnauth.events.loginto.LoginToLoginListener;
+import me.lokspel.spawnauth.events.loginto.LoginToUnregisterListener;
 import me.lokspel.spawnauth.events.openlogin.OpenLoginAuthenticateListener;
 import me.lokspel.spawnauth.helpers.AuthHelper;
 import me.lokspel.spawnauth.helpers.GameHelper;
@@ -117,6 +120,12 @@ public final class SpawnAuth extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new LoginSecurityLogoutListener(saveHelper), this);
             getServer().getPluginManager().registerEvents(new LoginSecurityUnregisterListener(saveHelper), this);
         }
+
+        if ("LoginTo".equals(provider)) {
+            LoginToLoginListener.register(gameHelper, loginMode, registerMode);
+            LoginToUnregisterListener.register(saveHelper);
+            getServer().getPluginManager().registerEvents(new LoginToJoinListener(this, gameHelper, loginMode, registerMode), this);
+        }
     }
 
     @Override
@@ -185,7 +194,12 @@ public final class SpawnAuth extends JavaPlugin {
             return "AuthMe";
         }
 
-        LogHelper.LOGGER.severe("No supported authentication plugin found. Install nLogin, OpenLogin, LoginSecurity, or AuthMe.");
+        if (isPluginEnabled("LoginTo")) {
+            LogHelper.LOGGER.info("Using LoginTo as the authentication provider.");
+            return "LoginTo";
+        }
+
+        LogHelper.LOGGER.severe("No supported authentication plugin found. Install nLogin, OpenLogin, LoginSecurity, AuthMe, or LoginTo.");
         return null;
     }
 

@@ -17,6 +17,7 @@
     <nlogin.version>2.0</nlogin.version>
     <openlogin.version>1.3</openlogin.version>
     <loginsecurity.version>3.3.1</loginsecurity.version>
+    <loginto.version>4.1.0</loginto.version>
     <bstats.version>3.2.1</bstats.version>
     <folialib.version>0.5.1</folialib.version>
     <hikaricp.version>7.1.0</hikaricp.version>
@@ -87,6 +88,13 @@
       <version>${loginsecurity.version}</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/libs/LoginSecurity-Spigot-${loginsecurity.version}.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.github.yager400</groupId>
+      <artifactId>loginto</artifactId>
+      <version>${loginto.version}</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/LoginTo-${loginto.version}.jar</systemPath>
     </dependency>
 
     <!-- Compile-time only (shaded into the final jar) -->

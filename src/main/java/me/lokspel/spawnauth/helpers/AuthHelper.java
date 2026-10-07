@@ -1,5 +1,7 @@
 package me.lokspel.spawnauth.helpers;
 
+import com.github.yager400.loginto.bukkit.LoginTo;
+import com.github.yager400.loginto.common.players.Sessions;
 import com.lenis0012.bukkit.loginsecurity.LoginSecurity;
 import com.nickuc.login.api.nLoginAPI;
 import com.nickuc.login.api.types.Identity;
@@ -51,6 +53,18 @@ public final class AuthHelper {
                     return player != null && AuthMeApi.getInstance().isAuthenticated(player);
                 };
                 registeredCheck = name -> AuthMeApi.getInstance().isRegistered(name);
+            }
+            case "LoginTo" -> {
+                authCheck = name -> {
+                    Player player = Bukkit.getPlayer(name);
+                    return player != null && Sessions.isPlayerLogged(player.getUniqueId());
+                };
+                registeredCheck = name -> {
+                    Player player = Bukkit.getPlayer(name);
+                    if (player == null) return false;
+                    var database = LoginTo.getDatabase();
+                    return database != null && database.databaseContainsPlayer(player.getUniqueId());
+                };
             }
         }
     }

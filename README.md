@@ -16,6 +16,7 @@ It is recommended to disable the corresponding spawn/limbo features in your auth
 * **nLogin**
 * **OpeNLogin**
 * **LoginSecurity**
+* **LoginTo**
 
 At least one supported authentication plugin is required.
 

@@ -4,4 +4,4 @@ main: me.lokspel.spawnauth.SpawnAuth
 api-version: '1.13'
 folia-supported: true
 authors: [ lokspel ]
-softdepend: [ AuthMe, nLogin, OpeNLogin, LoginSecurity ]
+softdepend: [ AuthMe, nLogin, OpeNLogin, LoginSecurity, LoginTo ]
