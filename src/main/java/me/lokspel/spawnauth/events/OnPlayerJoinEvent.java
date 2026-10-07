@@ -61,7 +61,8 @@ public class OnPlayerJoinEvent implements Listener {
             }
             Location authSpawn = gameHelper.getAuthSpawnLocation(modeFor(player));
             if (authSpawn != null) {
-                gameHelper.teleport(player, authSpawn);
+                plugin.getFoliaLib().getScheduler().runAtEntity(player, unused ->
+                        gameHelper.teleport(player, authSpawn));
             }
         }
     }
