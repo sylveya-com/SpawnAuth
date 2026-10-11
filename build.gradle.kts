@@ -1,7 +1,7 @@
 plugins {
     `java`
-    id("com.gradleup.shadow") version "9.6.1"
-    id("me.whereareiam.attache") version "1.0.0"
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.attache)
 }
 
 group = "me.lokspel"
@@ -25,26 +25,27 @@ repositories {
 
 dependencies {
     // Platform API (provided by server)
-    compileOnly("io.papermc.paper:paper-api:[26.2.build,)")
+    compileOnly(libs.paper.api)
 
     // Soft dependencies (provided by server plugins)
-    compileOnly("fr.xephi:authme:5.7.0-SNAPSHOT")
-    compileOnly("com.nickuc.login:api:2.0")
-    compileOnly("com.nickuc.openlogin:openlogin-universal:1.3")
+    compileOnly(libs.authme)
+    compileOnly(libs.nlogin)
+    compileOnly(libs.openlogin)
     compileOnly(files("libs/LoginSecurity-Spigot-3.3.1.jar"))
     compileOnly(files("libs/LoginTo-4.1.0.jar"))
 
     // Shaded dependencies
-    implementation("org.bstats:bstats-bukkit:3.2.1")
-    implementation("dev.faststats.metrics:bukkit:0.30.1")
-    implementation("com.tcoded:FoliaLib:0.5.1")
-    implementation("me.whereareiam:attache-bukkit:1.0.0")
-    implementation("me.whereareiam:attache-common:1.0.0")
+    implementation(libs.bstats.bukkit)
+    implementation(libs.faststats.bukkit)
+    implementation(libs.folialib)
+    implementation(libs.bundles.attache)
 
     // Dependencies loaded at runtime by Attache (NOT shaded)
-    attache("com.mysql:mysql-connector-j:9.4.0")
-    attache("org.xerial:sqlite-jdbc:3.45.1.0")
-    attache("com.zaxxer:HikariCP:7.1.0")
+    attache(libs.bundles.database)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.encoding = "UTF-8"
 }
 
 tasks.processResources {
@@ -75,6 +76,6 @@ tasks.shadowJar {
     exclude("module-info.class")
 }
 
-tasks.build {
-    dependsOn(tasks.shadowJar)
+tasks.jar {
+    enabled = false
 }
