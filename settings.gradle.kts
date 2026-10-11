@@ -1,5 +1,3 @@
-rootProject.name = "spawnauth"
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -7,3 +5,5 @@ pluginManagement {
         maven("https://maven.whereareiam.me/release")
     }
 }
+
+rootProject.name = "spawnauth"

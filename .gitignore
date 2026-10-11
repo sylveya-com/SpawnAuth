@@ -1,7 +1,14 @@
-# Maven
-target/
+# Gradle
+.gradle/
+build/
+
+# Do not ignore gradle wrapper or project libraries
 *.jar
-*.war
+!gradle/wrapper/gradle-wrapper.jar
+!libs/*.jar
+
+# Maven (legacy)
+target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -19,15 +26,12 @@ dependency-reduced-pom.xml
 .project
 .settings/
 bin/
+out/
+.vscode/
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Build
-.gradle/
-out/
-build/
 
 # Misc
 *.log
