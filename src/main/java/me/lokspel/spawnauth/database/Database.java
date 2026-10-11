@@ -5,14 +5,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import me.lokspel.spawnauth.config.section.DatabaseSection;
 import me.lokspel.spawnauth.database.connection.ConnectionProvider;
 import me.lokspel.spawnauth.database.repository.SavedLocationRepository;
-import me.lokspel.spawnauth.dependencies.DatabaseLibrary;
-
-import java.nio.file.Path;
 import java.sql.DriverManager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 public final class Database implements AutoCloseable {
 
     private final HikariDataSource dataSource;
@@ -28,9 +24,8 @@ public final class Database implements AutoCloseable {
         this.savedLocationRepository = new SavedLocationRepository(connectionProvider, tablePrefix, executor, isSqlite);
     }
 
-    public static Database forSQLite(DatabaseSection section, Path libsDir, String tablePrefix) throws Exception {
-        DatabaseLibrary.SQLITE.ensureLoaded(libsDir);
-        String url = DatabaseLibrary.SQLITE.getJdbcUrl(section);
+    public static Database forSQLite(DatabaseSection section, String tablePrefix) {
+        String url = "jdbc:sqlite:" + section.getDatabaseFile().getAbsolutePath();
 
         return new Database(
                 () -> DriverManager.getConnection(url),
@@ -41,11 +36,12 @@ public final class Database implements AutoCloseable {
         );
     }
 
-    public static Database forMySQL(DatabaseSection section, Path libsDir) throws Exception {
-        DatabaseLibrary.MYSQL.ensureLoaded(libsDir);
+    public static Database forMySQL(DatabaseSection section) {
+        String url = "jdbc:mysql://" + section.getMySqlHost() + ":" + section.getMySqlPort()
+                + "/" + section.getMySqlDatabase() + "?" + section.getMySqlUrlParameters();
 
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(DatabaseLibrary.MYSQL.getJdbcUrl(section));
+        config.setJdbcUrl(url);
         config.setUsername(section.getMySqlUser());
         config.setPassword(section.getMySqlPassword());
         config.setMaximumPoolSize(section.getMaxPoolSize());
@@ -63,10 +59,10 @@ public final class Database implements AutoCloseable {
         );
     }
 
-    public static Database create(DatabaseSection section, Path libsDir, boolean cacheEnabled) throws Exception {
+    public static Database create(DatabaseSection section, boolean cacheEnabled) {
         return switch (section.getType()) {
-            case SQLITE -> forSQLite(section, libsDir, section.getTablePrefix());
-            case MYSQL -> forMySQL(section, libsDir);
+            case SQLITE -> forSQLite(section, section.getTablePrefix());
+            case MYSQL -> forMySQL(section);
             case NONE -> {
                 if (!cacheEnabled) {
                     throw new IllegalStateException("Database type 'none' requires the in-memory cache to be enabled.");

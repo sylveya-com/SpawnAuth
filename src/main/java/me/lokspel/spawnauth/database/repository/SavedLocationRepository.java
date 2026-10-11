@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 
+@SuppressWarnings({"SqlNoDataSourceInspection", "UnusedReturnValue"})
 public class SavedLocationRepository {
 
     private static final String COLUMNS = "name, x, y, z, yaw, pitch, world";
@@ -117,15 +118,15 @@ public class SavedLocationRepository {
              Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
 
-            addColumnIfMissing(connection, "yaw", "FLOAT NOT NULL DEFAULT 0");
-            addColumnIfMissing(connection, "pitch", "FLOAT NOT NULL DEFAULT 0");
+            addColumnIfMissing(connection, "yaw");
+            addColumnIfMissing(connection, "pitch");
         }
     }
 
-    private void addColumnIfMissing(Connection connection, String column, String definition) throws SQLException {
+    private void addColumnIfMissing(Connection connection, String column) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(
-                    "ALTER TABLE " + table + " ADD COLUMN " + column + " " + definition
+                    "ALTER TABLE " + table + " ADD COLUMN " + column + " FLOAT NOT NULL DEFAULT 0"
             );
         } catch (SQLException exception) {
             if (!isColumnAlreadyExists(exception)) {

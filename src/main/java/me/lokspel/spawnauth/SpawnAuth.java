@@ -33,6 +33,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import me.whereareiam.attache.platform.bukkit.BukkitLibraryManager;
 
 
 public final class SpawnAuth extends JavaPlugin {
@@ -46,6 +47,13 @@ public final class SpawnAuth extends JavaPlugin {
     private FoliaLib foliaLib;
     private SaveHelper saveHelper;
     private GameHelper gameHelper;
+    private BukkitLibraryManager libraryManager;
+
+    @Override
+    public void onLoad() {
+        libraryManager = new BukkitLibraryManager(this, "libraries");
+        libraryManager.loadDescriptors();
+    }
 
     @Override
     public void onEnable() {
@@ -139,6 +147,10 @@ public final class SpawnAuth extends JavaPlugin {
         if (saveHelper != null && gameHelper != null) {
             saveHelper.handleDisable(gameHelper);
         }
+
+        if (libraryManager != null) {
+            libraryManager.close();
+        }
     }
 
     public FoliaLib getFoliaLib() {
@@ -147,12 +159,11 @@ public final class SpawnAuth extends JavaPlugin {
 
     private SaveHelper initSaveHelper(MainConfig config) {
         boolean cache = config.database().useCache();
-        var libsDir = getDataFolder().toPath().resolve("libraries");
         String loginMode = config.limbo().getLoginSpawnMode();
         String registerMode = config.limbo().getRegisterSpawnMode();
 
         try {
-            Database database = Database.create(config.database(), libsDir, cache);
+            Database database = Database.create(config.database(), cache);
             return SaveHelper.create(database, cache, loginMode, registerMode);
         } catch (Exception e) {
             if (cache) {
