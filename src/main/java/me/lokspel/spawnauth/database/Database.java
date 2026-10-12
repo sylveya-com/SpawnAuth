@@ -5,18 +5,19 @@ import com.zaxxer.hikari.HikariDataSource;
 import me.lokspel.spawnauth.config.section.DatabaseSection;
 import me.lokspel.spawnauth.database.connection.ConnectionProvider;
 import me.lokspel.spawnauth.database.repository.SavedLocationRepository;
+import me.whereareiam.attache.LibraryManager;
 import java.sql.DriverManager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 public final class Database implements AutoCloseable {
 
-    private final HikariDataSource dataSource;
+    private final AutoCloseable dataSource;
     private final ConnectionProvider connectionProvider;
     private final ExecutorService executor;
     private final SavedLocationRepository savedLocationRepository;
 
-    private Database(ConnectionProvider connectionProvider, HikariDataSource dataSource,
+    private Database(ConnectionProvider connectionProvider, AutoCloseable dataSource,
                      String tablePrefix, ExecutorService executor, boolean isSqlite) {
         this.connectionProvider = connectionProvider;
         this.dataSource = dataSource;
@@ -59,10 +60,20 @@ public final class Database implements AutoCloseable {
         );
     }
 
-    public static Database create(DatabaseSection section, boolean cacheEnabled) {
+    public static Database create(LibraryManager libraryManager, DatabaseSection section, boolean cacheEnabled) {
         return switch (section.getType()) {
-            case SQLITE -> forSQLite(section, section.getTablePrefix());
-            case MYSQL -> forMySQL(section);
+            case SQLITE -> {
+                if (libraryManager != null) {
+                    libraryManager.loadGroups("sqlite");
+                }
+                yield forSQLite(section, section.getTablePrefix());
+            }
+            case MYSQL -> {
+                if (libraryManager != null) {
+                    libraryManager.loadGroups("mysql");
+                }
+                yield forMySQL(section);
+            }
             case NONE -> {
                 if (!cacheEnabled) {
                     throw new IllegalStateException("Database type 'none' requires the in-memory cache to be enabled.");
@@ -89,7 +100,11 @@ public final class Database implements AutoCloseable {
         }
 
         if (dataSource != null) {
-            dataSource.close();
+            try {
+                dataSource.close();
+            } catch (Exception exception) {
+                // Ignore exception on close
+            }
         }
         connectionProvider.close();
     }

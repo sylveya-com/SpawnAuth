@@ -16,7 +16,7 @@ sqlite = "3.45.1.0"
 hikaricp = "7.1.0"
 
 # Attache Library Loader
-attache = "1.0.0"
+attache = "feature-dependency-groups-6c4a415"
 
 # Plugins
 shadow = "9.6.1"

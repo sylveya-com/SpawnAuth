@@ -40,8 +40,17 @@ dependencies {
     implementation(libs.folialib)
     implementation(libs.bundles.attache)
 
-    // Dependencies loaded at runtime by Attache (NOT shaded)
-    attache(libs.bundles.database)
+}
+
+attache {
+    group("sqlite") {
+        library(libs.sqlite.jdbc)
+    }
+
+    group("mysql") {
+        library(libs.mysql.connector)
+        library(libs.hikaricp)
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {

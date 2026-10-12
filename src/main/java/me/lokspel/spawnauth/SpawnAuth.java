@@ -163,7 +163,7 @@ public final class SpawnAuth extends JavaPlugin {
         String registerMode = config.limbo().getRegisterSpawnMode();
 
         try {
-            Database database = Database.create(config.database(), cache);
+            Database database = Database.create(libraryManager, config.database(), cache);
             return SaveHelper.create(database, cache, loginMode, registerMode);
         } catch (Exception e) {
             if (cache) {
