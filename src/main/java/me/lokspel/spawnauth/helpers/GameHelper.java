@@ -97,7 +97,7 @@ public class GameHelper {
         if (shouldTeleport(mode)) {
             saveHelper.takeLocation(player.getName()).thenAccept(location -> {
                 if (location != null) {
-                    plugin.getFoliaLib().getScheduler().runAtEntity(player, unused -> teleport(player, location));
+                    plugin.getFoliaLib().getScheduler().runAtEntity(player, _ -> teleport(player, location));
                 }
             });
         }
@@ -107,7 +107,7 @@ public class GameHelper {
     }
 
     public void releaseFromLimboAsync(Player player, String mode) {
-        plugin.getFoliaLib().getScheduler().runAtEntity(player, unused -> releaseFromLimbo(player, mode));
+        plugin.getFoliaLib().getScheduler().runAtEntity(player, _ -> releaseFromLimbo(player, mode));
     }
 
     public void updateLimboCollision(Player player) {

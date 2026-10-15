@@ -10,9 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class LoginToJoinListener implements Listener {
-    // LoginTo marks the player as logged 5 ticks after it accepts a session
-    private static final long SESSION_WAIT_TICKS = 10L;
-
     private final SpawnAuth plugin;
     private final GameHelper gameHelper;
     private final String loginMode;
@@ -28,7 +25,7 @@ public class LoginToJoinListener implements Listener {
     @EventHandler
     private void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        plugin.getFoliaLib().getScheduler().runAtEntityLater(player, unused -> checkSession(player), SESSION_WAIT_TICKS);
+        plugin.getFoliaLib().getScheduler().runAtEntity(player, _ -> checkSession(player));
     }
 
     private void checkSession(Player player) {

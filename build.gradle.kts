@@ -32,7 +32,7 @@ dependencies {
     compileOnly(libs.nlogin)
     compileOnly(libs.openlogin)
     compileOnly(files("libs/LoginSecurity-Spigot-3.3.1.jar"))
-    compileOnly(files("libs/LoginTo-4.1.0.jar"))
+    compileOnly(files("libs/LoginTo-4.1.1.jar"))
 
     // Shaded dependencies
     implementation(libs.bstats.bukkit)

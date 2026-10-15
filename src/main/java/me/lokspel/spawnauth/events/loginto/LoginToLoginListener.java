@@ -18,11 +18,11 @@ public final class LoginToLoginListener {
     public static void register(GameHelper gameHelper, String loginMode, String registerMode) {
         EventManager eventManager = LoginTo.getEventManager();
 
-        eventManager.register(PlayerLoginEvent.class,
-                event -> release(gameHelper, event.getPlayerUUID(), loginMode));
-
         eventManager.register(PlayerRegistrationEvent.class,
                 event -> release(gameHelper, event.getPlayerUUID(), registerMode));
+
+        eventManager.register(PlayerLoginEvent.class,
+                event -> release(gameHelper, event.getPlayerUUID(), loginMode));
     }
 
     private static void release(GameHelper gameHelper, UUID playerUUID, String mode) {

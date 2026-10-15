@@ -15,8 +15,8 @@ import java.util.function.Predicate;
 
 public final class AuthHelper {
 
-    private static Predicate<Player> authCheck = player -> false;
-    private static Predicate<Player> registeredCheck = player -> false;
+    private static Predicate<Player> authCheck = _ -> false;
+    private static Predicate<Player> registeredCheck = _ -> false;
 
     private AuthHelper() {
     }
